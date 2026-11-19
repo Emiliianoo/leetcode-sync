@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "LeetCode → GitHub",
+  "name": "Leetcode-Sync",
   "version": "1.0",
   "permissions": ["storage"],
   "options_page": "options.html",
