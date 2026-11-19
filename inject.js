@@ -1,4 +1,3 @@
-console.log("inject.js loaded");
 // Runs inside LeetCode's own page (MAIN world).
 // It can see the page's fetch calls, but it CANNOT use chrome.* APIs.
 
@@ -22,7 +21,7 @@ window.fetch = async (...args) => {
         if (data.state === "SUCCESS" && data.status_msg === "Accepted") {
           window.postMessage(
             { type: "LC_ACCEPTED", submissionId: match[1] },
-            "*",
+            location.origin, // only deliver to this same page
           );
         }
       })

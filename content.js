@@ -31,13 +31,22 @@ button.style.cssText =
   "position:fixed;bottom:20px;right:20px;z-index:99999;padding:10px;background:black;color:white;border-radius:8px";
 document.body.appendChild(button);
 
+// The submission id in the URL, e.g. /problems/two-sum/submissions/123/ or /submissions/detail/123/
+function currentSubmissionId() {
+  return location.pathname.match(/submissions\/(?:detail\/)?(\d+)/)?.[1];
+}
+
+// Only show it while a submission is open. LeetCode is a single-page app, so the
+// URL changes without a reload and we have to keep checking
+function updateButtonVisibility() {
+  button.style.display = currentSubmissionId() ? "" : "none";
+}
+updateButtonVisibility();
+setInterval(updateButtonVisibility, 1000);
+
 button.addEventListener("click", () => {
-  const match = location.pathname.match(/submissions\/(?:detail\/)?(\d+)/);
-  if (!match) {
-    showToast("❌ Open a submission first");
-    return;
-  }
-  uploadSubmission(match[1]);
+  const submissionId = currentSubmissionId();
+  if (submissionId) uploadSubmission(submissionId);
 });
 
 // ─── Shared logic ───
@@ -47,34 +56,42 @@ async function uploadSubmission(submissionId) {
 
   showToast("⏳ Uploading to GitHub...");
 
+  // On any failure, forget the id so the user can retry
+  const fail = (text, error) => {
+    uploadedIds.delete(submissionId);
+    showToast(text);
+    console.error(error);
+  };
+
+  let submission;
   try {
-    const submission = await fetchSubmission(submissionId);
+    submission = await fetchSubmission(submissionId);
+  } catch (error) {
+    return fail("❌ LeetCode error (see console)", error);
+  }
 
-    const number = submission.question.questionFrontendId.padStart(4, "0");
-    const extension = EXTENSIONS[submission.lang.name] ?? "txt";
-    const path = `${number}-${submission.question.titleSlug}/solution.${extension}`;
+  const { title, titleSlug, questionFrontendId } = submission.question;
+  const number = questionFrontendId.padStart(4, "0");
+  const extension = EXTENSIONS[submission.lang.name] ?? "txt";
 
-    const message = {
+  let response;
+  try {
+    response = await chrome.runtime.sendMessage({
       type: "upload",
-      path,
+      path: `${number}-${titleSlug}/solution.${extension}`,
       content: submission.code,
-      commitMessage: `${submission.question.title} (${submission.runtimeDisplay}, ${submission.memoryDisplay})`,
-    };
-
-    chrome.runtime.sendMessage(message, (response) => {
-      if (response.ok) {
-        showToast(`✅ ${submission.question.title} uploaded`);
-      } else {
-        uploadedIds.delete(submissionId); // allow retrying
-        showToast("❌ GitHub error (see console)");
-        console.error(response.error);
-      }
+      commitMessage: `${title} (${submission.runtimeDisplay}, ${submission.memoryDisplay})`,
     });
   } catch (error) {
-    uploadedIds.delete(submissionId); // allow retrying
-    showToast("❌ LeetCode error (see console)");
-    console.error(error);
+    // Happens when the extension is reloaded/updated while this tab stays open
+    return fail("❌ Extension was reloaded, refresh the page", error);
   }
+
+  if (!response?.ok) {
+    return fail("❌ GitHub error (see console)", response?.error ?? "No response from the extension");
+  }
+
+  showToast(response.skipped ? `✔️ ${title} already up to date` : `✅ ${title} uploaded`);
 }
 
 async function fetchSubmission(submissionId) {
