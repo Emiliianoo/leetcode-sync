@@ -2,28 +2,257 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LeetCode → GitHub · Settings</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --card: #ffffff;
+        --text: #1f2328;
+        --muted: #656d76;
+        --border: #d0d7de;
+        --accent: #ffa116; /* LeetCode orange */
+        --accent-text: #1f2328;
+        --focus: rgba(255, 161, 22, 0.35);
+        --success: #1a7f37;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d1117;
+          --card: #161b22;
+          --text: #e6edf3;
+          --muted: #8d96a0;
+          --border: #30363d;
+          --success: #3fb950;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px 16px;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          14px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .field {
+        margin-bottom: 18px;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      input {
+        width: 100%;
+        padding: 9px 12px;
+        font: inherit;
+        color: var(--text);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+
+      input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--focus);
+      }
+
+      .with-toggle {
+        position: relative;
+      }
+
+      .with-toggle input {
+        padding-right: 64px;
+      }
+
+      .toggle {
+        position: absolute;
+        top: 50%;
+        right: 6px;
+        transform: translateY(-50%);
+        padding: 4px 8px;
+        font: inherit;
+        font-size: 12px;
+        color: var(--muted);
+        background: none;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .toggle:hover {
+        color: var(--text);
+      }
+
+      .hint {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .hint a {
+        color: var(--accent);
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      footer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      button[type="submit"] {
+        padding: 9px 20px;
+        font: inherit;
+        font-weight: 600;
+        color: var(--accent-text);
+        background: var(--accent);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: filter 0.15s;
+      }
+
+      button[type="submit"]:hover {
+        filter: brightness(1.08);
+      }
+
+      #status {
+        color: var(--success);
+        font-weight: 500;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      #status.visible {
+        opacity: 1;
+      }
+
+      @media (max-width: 420px) {
+        .row {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+      }
+    </style>
   </head>
-  <body style="font-family: sans-serif; max-width: 400px; margin: 30px auto">
-    <h2>LeetCode → GitHub</h2>
+  <body>
+    <main class="card">
+      <header>
+        <div>
+          <h1>LeetCode → GitHub</h1>
+          <p class="subtitle">
+            Accepted solutions are pushed to your repo automatically.
+          </p>
+        </div>
+      </header>
 
-    <label>GitHub token</label><br />
-    <input id="token" type="password" style="width: 100%" /><br />
-    <small style="color: #666">
-      Use a
-      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">fine-grained token</a>
-      with access to only this repository and the permission
-      <b>Contents: Read and write</b>.
-    </small><br /><br />
+      <form id="form">
+        <div class="field">
+          <label for="token">GitHub token</label>
+          <div class="with-toggle">
+            <input
+              id="token"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="github_pat_…"
+            />
+            <button type="button" class="toggle" id="toggle-token">Show</button>
+          </div>
+          <div class="hint">
+            Use a
+            <a
+              href="https://github.com/settings/personal-access-tokens/new"
+              target="_blank"
+              >fine-grained token</a
+            >
+            with access to only this repository and the permission
+            <b>Contents: Read and write</b>.
+          </div>
+        </div>
 
-    <label>GitHub username</label><br />
-    <input id="owner" style="width: 100%" /><br /><br />
+        <div class="row">
+          <div class="field">
+            <label for="owner">GitHub username</label>
+            <input
+              id="owner"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="octocat"
+            />
+          </div>
+          <div class="field">
+            <label for="repo">Repository</label>
+            <input
+              id="repo"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="leetcode-solutions"
+            />
+          </div>
+        </div>
 
-    <label>Repository</label><br />
-    <input id="repo" style="width: 100%" /><br /><br />
-
-    <button id="save">Save</button>
-    <span id="status"></span>
+        <footer>
+          <button type="submit">Save</button>
+          <span id="status">Saved ✓</span>
+        </footer>
+      </form>
+    </main>
 
     <script src="options.js"></script>
   </body>
