@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Packaged extension builds
+*.zip
+*.crx
+
+# Private key Chrome generates when packing the extension — never commit
+*.pem
+
+# Local secrets
+.env
